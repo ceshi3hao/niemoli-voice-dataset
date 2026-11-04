@@ -1,0 +1,4 @@
+numpy>=1.24
+# 以下由平台 PyTorch 镜像提供，无需单独安装：
+# torch>=2.1 (CUDA 12.1), torchaudio
+# GPT-SoVITS 其余依赖按其官方 requirements.txt 安装
