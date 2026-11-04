@@ -1,8 +1,12 @@
 # 还原方法（GPU 服务器上）
 
-最简单：直接用包内的 gpu_train/bootstrap.sh，它会自动下载分卷、拼接、校验、解压。
+最省事：用仓库主分支的脚本，它会自动下载分卷、逐卷断点续传、校验 sha256、拼接、解压。
 
-手动还原：把下面所有 part_* 下载到同一目录，保持文件名与顺序不变：
+    git clone https://github.com/ceshi3hao/niemoli-voice-dataset.git
+    cd niemoli-voice-dataset
+    bash gpu_train/bootstrap.sh
+
+手动还原：把下面 10 个 part_* 下载到同一目录，保持文件名与顺序不变：
 
     cat niemoli-clean-train-pack.part_* > niemoli-clean-train-pack.zip
     sha256sum niemoli-clean-train-pack.zip
@@ -15,3 +19,6 @@
     cat gpu_train/train_params.md            # GPT-SoVITS 参数
 
 注意：全部素材都没有角色标注，开训前必须试听 分组试听/ 锁定聂莫黎并剔除聂莫琪（同一配音演员）。
+
+## 逐卷校验
+每卷大小与 sha256 见 MANIFEST.md 的「分卷清单」段；网络被限速时用 curl -C - 断点续传。
