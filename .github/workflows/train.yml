@@ -16,7 +16,7 @@ on:
 
 jobs:
   prepare-and-train:
-    runs-on: [self-hosted, linux, gpu]
+    runs-on: [self-hosted, gpu]
     steps:
       - uses: actions/checkout@v4
 
