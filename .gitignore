@@ -1,0 +1,9 @@
+# 大文件走 GitHub Release，不进 git
+*.zip
+*.part_*
+*.wav
+*.mp3
+*.m4a
+dataset_ready/
+parts/
+pack.zip
