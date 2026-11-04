@@ -1,0 +1,48 @@
+name: Train on self-hosted GPU
+
+# 在带 GPU 的服务器上把本仓库注册为 self-hosted runner（label: gpu）后，
+# 在 Actions 页面点 Run workflow 即可从 Release 拉数据并开训。
+on:
+  workflow_dispatch:
+    inputs:
+      include_normal:
+        description: '并入 967 条窄带素材（默认只用 382 条高音质）'
+        type: boolean
+        default: false
+      run_training:
+        description: '执行 GPT-SoVITS 训练（需先在 runner 上装好）'
+        type: boolean
+        default: false
+
+jobs:
+  prepare-and-train:
+    runs-on: [self-hosted, linux, gpu]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch dataset from Release
+        run: bash gpu_train/bootstrap.sh
+
+      - name: Prepare dataset (normalize + slice)
+        run: |
+          ROOT="${{ github.workspace }}/niemoli-voice/niemoli-clean-train-pack"
+          if [ "${{ inputs.include_normal }}" = "true" ]; then
+            python3 gpu_train/prepare_dataset.py --root "$ROOT" --include-normal
+          else
+            python3 gpu_train/prepare_dataset.py --root "$ROOT"
+          fi
+
+      - name: Verify GPU
+        run: nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
+
+      # 训练命令按 GPT-SoVITS 实际安装路径配置：
+      # 在仓库 Settings -> Secrets and variables -> Actions -> Variables 里加 SOVITS_DIR
+      - name: Train s1 / s2
+        if: ${{ inputs.run_training }}
+        env:
+          SOVITS_DIR: ${{ vars.SOVITS_DIR }}
+        run: |
+          : "${SOVITS_DIR:?请先在仓库 Variables 里设置 SOVITS_DIR 指向 GPT-SoVITS 根目录}"
+          cd "$SOVITS_DIR"
+          python s1_train.py --config configs/s1longer.yaml
+          python s2_train.py --config configs/s2.json
